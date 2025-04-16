@@ -62,5 +62,13 @@ const produtos = [
         "preco": 390.90,
         "peso": 0.9,
         "imagem": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqNePMM2cRB6d_3OkOX9oxna4zFU13BLtAWg&s"
+    },
+    {
+        "id": 9,
+        "nome": "Luva de goleiro",
+        "descricao": "Luva de goleiro feita de material resistente e durável",
+        "preco": 190.90,
+        "peso": 0.3,
+        "imagem": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyQkPzwgAAkvT65_Zt1eTS84EZyaePhej9Pg&s"
     }
 ];
