@@ -83,7 +83,7 @@
       margin-right: 1rem;
     }
 
-    #dados-pagamento input {
+    #dados-pagamento input, #cep {
       width: 100%;
       padding: 0.5rem;
       margin-top: 0.3rem;
@@ -127,6 +127,11 @@
 
     <div id="resumo">
       <h2>Total: <span id="total">R$ 0,00</span></h2>
+
+      <div id="cep-entrega">
+        <p><strong>CEP de Entrega:</strong></p>
+        <input type="text" id="cep" placeholder="Digite seu CEP" required>
+      </div>
 
       <div id="formas-pagamento">
         <p><strong>Forma de Pagamento:</strong></p>
@@ -218,6 +223,12 @@
     });
 
     btnEnviar.addEventListener('click', () => {
+      const cep = document.getElementById('cep')?.value;
+      if (!cep || !/^\d{5}-?\d{3}$/.test(cep)) {
+        alert('Por favor, preencha um CEP válido (ex: 12345-678).');
+        return;
+      }
+
       const formaSelecionada = document.querySelector('input[name="pagamento"]:checked').value;
 
       if (formaSelecionada === 'Pix') {
@@ -227,7 +238,7 @@
           alert('Preencha os dados do Pix corretamente!');
           return;
         }
-        alert(`Pedido enviado via Pix!\nNome: ${nome}\nChave Pix: ${chave}`);
+        alert(`Pedido enviado via Pix!\nNome: ${nome}\nChave Pix: ${chave}\nCEP: ${cep}`);
       }
 
       else if (formaSelecionada === 'Cartão') {
@@ -243,11 +254,11 @@
           return;
         }
 
-        alert(`Pedido enviado com Cartão!\nNome: ${nome}\nEmail: ${email}`);
+        alert(`Pedido enviado com Cartão!\nNome: ${nome}\nEmail: ${email}\nCEP: ${cep}`);
       }
 
       else if (formaSelecionada === 'Boleto') {
-        alert('Pedido gerado via boleto! Enviaremos o código para seu e-mail.');
+        alert(`Pedido gerado via boleto!\nEnviaremos o código para seu e-mail.\nCEP: ${cep}`);
       }
 
       localStorage.removeItem('carrinho');
