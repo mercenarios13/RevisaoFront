@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Carrinho - Mariana Vest</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0 1rem;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 2px solid #ccc;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      color: #000000;
+    }
+
+    header button {
+      background-color: #000000;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 900px;
+      margin: auto;
+      padding: 1rem 0;
+    }
+
+    .item-carrinho {
+      display: flex;
+      gap: 1rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .item-carrinho img {
+      width: 100px;
+      height: auto;
+      border-radius: 5px;
+    }
+
+    .info {
+      flex-grow: 1;
+    }
+
+    #resumo {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      margin-bottom: 1rem;
+    }
+
+    #formas-pagamento, #dados-pagamento {
+      margin-top: 1rem;
+    }
+
+    #formas-pagamento label {
+      margin-right: 1rem;
+    }
+
+    #dados-pagamento input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.3rem;
+      margin-bottom: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #enviar-pedido {
+      background-color: #ff0000;
+      color: #fff;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    @media (max-width: 600px) {
+      .item-carrinho {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .item-carrinho img {
+        width: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Carrinho de Compras</h1>
+    <button onclick="window.location.href='index.html'">⬅️ Voltar</button>
+  </header>
+
+  <main>
+    <div id="carrinho-container"></div>
+
+    <div id="resumo">
+      <h2>Total: <span id="total">R$ 0,00</span></h2>
+
+      <div id="formas-pagamento">
+        <p><strong>Forma de Pagamento:</strong></p>
+        <label><input type="radio" name="pagamento" value="Pix" checked> Pix</label>
+        <label><input type="radio" name="pagamento" value="Cartão"> Cartão de Crédito</label>
+        <label><input type="radio" name="pagamento" value="Boleto"> Boleto</label>
+      </div>
+
+      <div id="dados-pagamento"></div>
+
+      <button id="enviar-pedido">Finalizar Pedido</button>
+    </div>
+  </main>
+
+  <script>
+    const carrinhoContainer = document.getElementById('carrinho-container');
+    const totalSpan = document.getElementById('total');
+    const btnEnviar = document.getElementById('enviar-pedido');
+    const dadosPagamento = document.getElementById('dados-pagamento');
+    const radiosPagamento = document.querySelectorAll('input[name="pagamento"]');
+
+    function carregarCarrinho() {
+      const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+      carrinhoContainer.innerHTML = '';
+      let total = 0;
+
+      carrinho.forEach((produto, index) => {
+        const subtotal = produto.preco * produto.quantidade;
+        total += subtotal;
+
+        const item = document.createElement('div');
+        item.classList.add('item-carrinho');
+        item.innerHTML = `
+          <img src="${produto.imagem}" alt="${produto.nome}" />
+          <div class="info">
+            <h3>${produto.nome}</h3>
+            <p>Preço: R$ ${produto.preco.toFixed(2).replace('.', ',')}</p>
+            <label>Qtd:
+              <input type="number" min="0" value="${produto.quantidade}" data-index="${index}" />
+            </label>
+          </div>
+        `;
+        carrinhoContainer.appendChild(item);
+      });
+
+      totalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    }
+
+    carrinhoContainer.addEventListener('input', (e) => {
+      if (e.target.type === 'number') {
+        const index = e.target.getAttribute('data-index');
+        let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        const novaQtd = parseInt(e.target.value);
+
+        if (novaQtd === 0) {
+          carrinho.splice(index, 1);
+        } else {
+          carrinho[index].quantidade = novaQtd;
+        }
+
+        localStorage.setItem('carrinho', JSON.stringify(carrinho));
+        carregarCarrinho();
+      }
+    });
+
+    function atualizarFormularioPagamento() {
+      const forma = document.querySelector('input[name="pagamento"]:checked').value;
+      dadosPagamento.innerHTML = '';
+
+      if (forma === 'Pix') {
+        dadosPagamento.innerHTML = `
+          <input type="text" id="nomePix" placeholder="Nome completo" required>
+          <input type="text" id="chavePix" placeholder="Chave Pix (CPF, e-mail ou telefone)" required>
+        `;
+      } else if (forma === 'Cartão') {
+        dadosPagamento.innerHTML = `
+          <input type="text" id="nomeCartao" placeholder="Nome completo" required>
+          <input type="email" id="emailCartao" placeholder="E-mail" required>
+          <input type="text" id="cpfCartao" placeholder="CPF" required>
+          <input type="text" id="numeroCartao" placeholder="Número do Cartão" required>
+          <input type="text" id="validadeCartao" placeholder="Validade (MM/AA)" required>
+          <input type="text" id="cvvCartao" placeholder="CVV" required>
+        `;
+      }
+    }
+
+    radiosPagamento.forEach(radio => {
+      radio.addEventListener('change', atualizarFormularioPagamento);
+    });
+
+    btnEnviar.addEventListener('click', () => {
+      const formaSelecionada = document.querySelector('input[name="pagamento"]:checked').value;
+
+      if (formaSelecionada === 'Pix') {
+        const nome = document.getElementById('nomePix')?.value;
+        const chave = document.getElementById('chavePix')?.value;
+        if (!nome || !chave) {
+          alert('Preencha os dados do Pix corretamente!');
+          return;
+        }
+        alert(`Pedido enviado via Pix!\nNome: ${nome}\nChave Pix: ${chave}`);
+      }
+
+      else if (formaSelecionada === 'Cartão') {
+        const nome = document.getElementById('nomeCartao')?.value;
+        const email = document.getElementById('emailCartao')?.value;
+        const cpf = document.getElementById('cpfCartao')?.value;
+        const numero = document.getElementById('numeroCartao')?.value;
+        const validade = document.getElementById('validadeCartao')?.value;
+        const cvv = document.getElementById('cvvCartao')?.value;
+
+        if (!nome || !email || !cpf || !numero || !validade || !cvv) {
+          alert('Preencha todos os dados do cartão!');
+          return;
+        }
+
+        alert(`Pedido enviado com Cartão!\nNome: ${nome}\nEmail: ${email}`);
+      }
+
+      else if (formaSelecionada === 'Boleto') {
+        alert('Pedido gerado via boleto! Enviaremos o código para seu e-mail.');
+      }
+
+      localStorage.removeItem('carrinho');
+      window.location.href = 'index.html';
+    });
+
+    carregarCarrinho();
+    atualizarFormularioPagamento();
+  </script>
+</body>
+</html>
